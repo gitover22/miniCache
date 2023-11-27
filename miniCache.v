@@ -185,18 +185,13 @@ begin
 	data =    32'b00000000000000000000000110100010;			// 01a2      cache.cache[28] = 418
 	mode = 1'b1;                                            // 观察out的值是否是x
 
-    // #10
-	// address = 32'b10100111111001011111101001011100;			// A7E5 fa5c % size = 2652  cache hit     read value should be 418
-	// data =    32'b00000000000000000000000000000000;			// 0
-	// mode = 1'b0;                                            // 观察是否是01a2
-
-    // #10
+    	// #10
 	// address = 32'b10100111111001011111101001011100;			// A7E5 fa5c % size = 2652  cache hit     read value should be 418
 	// data =    32'b00000000000000000000000000000000;			// 0
 	// mode = 1'b0;                                            // 观察是否是01a2
     
-    #10
-    address = 32'b10100111111001011111101111011100;			// 2816867292 % size = 3036  cache miss   write allocate  read value should be ram.ram[3036] =02b1
+    	#10
+    	address = 32'b10100111111001011111101111011100;			// 2816867292 % size = 3036  cache miss   write allocate  read value should be ram.ram[3036] =02b1
 	data =    32'b00000000000000000000000000000000;			// 0
 	mode = 1'b0;                                            //观察读出的值是否是02b1
 end
