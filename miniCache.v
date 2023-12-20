@@ -13,7 +13,7 @@ initial
 		for (i = 0; i < size; i = i + 1)
 		begin
 			valid_array[i] = 1'b0;
-            dirty_array[i] = 1'b0;
+            		dirty_array[i] = 1'b0;
 			tag_array[i] = 6'b000000;
 		end
 	end
@@ -32,10 +32,10 @@ endmodule
 
 // cache和ram的顶层模块
 module cache_and_ram(
-	input [31:0] address,			// 地址结构：保留位（20bit）+ tag（6bit） + index（b6it）（注：每个存储单元是4B，且cache块大小也是4B，因此没有cache块内offset）
+	input [31:0] address,	// 地址结构：保留位（20bit）+ tag（6bit） + index（b6it）（注：每个存储单元是4B，且cache块大小也是4B，因此没有cache块内offset）
 	input [31:0] data,
 	input clk,
-	input mode,	// 1:write  0:read
+	input mode,		// 1:write  0:read
 	output [31:0] out
 );
 parameter size = 64;		// cache size
@@ -60,7 +60,7 @@ initial
 		prev_data = 0;
 		prev_mode = 0;
 	end
-// 检测clk上升沿
+
 always @(posedge clk)
 begin
 	// 检查读写是否发生变化
@@ -91,33 +91,32 @@ begin
                                 end
                             else
                                 begin
-                                    cache.valid_array[index] = 1;
-                                    cache.dirty_array[index] = 1;
-							        cache.tag_array[index] = tag;
-							        cache.cache[index] = data;      // 写入新数据
+				    cache.valid_array[index] = 1;
+				    cache.dirty_array[index] = 1;
+				    cache.tag_array[index] = tag;
+				    cache.cache[index] = data;      // 写入新数据
                                 end
-				        end
+			end
                         
                 end
 			else // read
+			begin
+				// 发现要读的数据不在cache中，要先把数据从ram搬到cache
+				if (cache.valid_array[index] != 1 || cache.tag_array[index] != tag)
 				begin
-					// 发现要读的数据不在cache中，要先把数据从ram搬到cache
-					if (cache.valid_array[index] != 1 || cache.tag_array[index] != tag)
-						begin
-                            // 待写入位置已有其他数据且脏位是1，需要写回ram
-                            if(cache.valid_array[index] == 1 && cache.tag_array[index]!= tag && cache.dirty_array[index] == 1)
-                                begin
-                                    
-                                    ram.ram[{cache.tag_array[index],index}] = cache.cache[index];
-                                end
-							cache.valid_array[index] = 1;
-							cache.tag_array[index] = tag;
-                            cache.dirty_array[index] =0; // read:0
-							cache.cache[index] = ram.ram[prev_address];
-						end
-					// read data
-					temp_out = cache.cache[index];
+				    // 待写入位置已有其他数据且脏位是1，需要写回ram
+					if(cache.valid_array[index] == 1 && cache.tag_array[index]!= tag && cache.dirty_array[index] == 1)
+					begin
+						ram.ram[{cache.tag_array[index],index}] = cache.cache[index];
+					end
+					cache.valid_array[index] = 1;
+					cache.tag_array[index] = tag;
+					cache.dirty_array[index] =0; // read:0
+					cache.cache[index] = ram.ram[prev_address];
 				end
+				// read data
+				temp_out = cache.cache[index];
+			end
 		end
 end
 
